@@ -1,8 +1,11 @@
 import UIKit
 
-var operation: String? = "+" // (+, -, *, /)
-var operand1: Int? = 10
-var operand2: Int? = 5
+enum CalculationError: Error
+{
+    case divisionByZero
+    case nullParameter
+    case unknownOperation
+}
 
 func add(_ a: Int, _ b: Int) -> Int
 {
@@ -19,37 +22,59 @@ func multiply(_ a: Int, _ b: Int) -> Int
     return a * b
 }
 
-func divide(_ a: Int, _ b: Int) -> Int
+func divide(_ a: Int, _ b: Int) throws -> Int
 {
-    guard b != 0 else
-    {
-        print("Error: Division by zero!")
-        return 0
+    guard b != 0 else {
+        throw CalculationError.divisionByZero
     }
     return a / b
 }
 
-if let operation = operation, let operand1 = operand1, let operand2 = operand2
+func calculate(_ operand1: Int?, _ operand2: Int?, _ operation: String?) throws -> Int
 {
-    var result: Int = 0
+    guard let operand1 = operand1, let operand2 = operand2, let operation = operation
+        else
+    {
+        throw CalculationError.nullParameter
+    }
+    
     switch operation
     {
     case "+":
-        result = add(operand1, operand2)
+        return add(operand1, operand2)
     case "-":
-        result = subtract(operand1, operand2)
+        return subtract(operand1, operand2)
     case "*":
-        result = multiply(operand1, operand2)
+        return multiply(operand1, operand2)
     case "/":
-        result = divide(operand1, operand2)
+        return try divide(operand1, operand2)
     default:
-        print("Unknown operation")
+        throw CalculationError.unknownOperation
     }
-    
+}
+
+var operation: String? = "yy"
+var operand1: Int? = 10
+var operand2: Int? = 5
+
+do
+{
+    let result = try calculate(operand1, operand2, operation)
     print("Result: \(result)")
 }
-    
-else
+catch CalculationError.nullParameter
 {
-    print("Null parameter")
+    print("Error: Null parameter")
+}
+catch CalculationError.divisionByZero
+{
+    print("Error: Division by zero!")
+}
+catch CalculationError.unknownOperation
+{
+    print("Error: Unknown operation")
+}
+catch
+{
+    print("An unknown error occurred: \(error)")
 }
